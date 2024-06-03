@@ -3,7 +3,7 @@ import time
 import logging
 import shutil
 import subprocess
-import tqdm
+from tqdm import tqdm
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,17 +18,16 @@ def make_files(file_num: int, file_name: str, msg: str, ext: str = "txt") -> Non
     ext (str): The file extension. Defaults to 'txt'.
     """
     start = time.time()
-    for i in range(file_num):
+    for i in tqdm(range(file_num), desc="Creating files"):
         try:
             with open(f"{file_name}_{i}.{ext}", 'w') as f:
                 f.write(msg)
-            logging.info(f"Successfully created {file_name}_{i}.{ext} at ({os.getcwd()})")
         except Exception as e:
-            logging.error(f"Failed to create {file_name}_{i}.{ext} due to {str(e)}")
+            print(f"Failed to create {file_name}_{i}.{ext} due to {str(e)}")
     end = time.time()
     elapsed = end - start
     avg_create_time = elapsed/file_num
-    logging.info(f"\nFiles created in average time: {avg_create_time}.\n")
+    print(f"\nFiles created in average time: {avg_create_time}.\n")
 
 def make_dirs(dir_num: int, dir_name: str) -> None:
     """
@@ -39,16 +38,15 @@ def make_dirs(dir_num: int, dir_name: str) -> None:
     dir_name (str): The base name for the directories.
     """
     start = time.time()
-    for i in range(dir_num):
+    for i in tqdm(range(dir_num), desc="Creating directories"):
         try:
             os.makedirs(f"{dir_name}_{i}", exist_ok=True)
-            logging.info(f"Successfully created {dir_name}_{i} at ({os.getcwd()})")
         except Exception as e:
-            logging.error(f"Failed to create {dir_name}_{i} due to {str(e)}")
+            print(f"Failed to create {dir_name}_{i} due to {str(e)}")
     end = time.time()
     elapsed = end - start
     avg_create_time = elapsed/dir_num
-    logging.info(f"\nDirectories created in average time: {avg_create_time}.\n")
+    print(f"\nDirectories created in average time: {avg_create_time}.\n")
 
 def make_nested_dirs(dir_num: int, dir_name: str, depth: int) -> None:
     """
@@ -60,17 +58,16 @@ def make_nested_dirs(dir_num: int, dir_name: str, depth: int) -> None:
     depth (int): The depth of the nested directories.
     """
     start = time.time()
-    for i in range(dir_num):
+    for i in tqdm(range(dir_num), desc="Creating nested directories"):
         nested_dir_name = os.path.join(*[f"{dir_name}_{i}" for _ in range(depth)])
         try:
             os.makedirs(nested_dir_name, exist_ok=True)
-            logging.info(f"Successfully created {nested_dir_name} at ({os.getcwd()})")
         except Exception as e:
-            logging.error(f"Failed to create {nested_dir_name} due to {str(e)}")
+            print(f"Failed to create {nested_dir_name} due to {str(e)}")
     end = time.time()
     elapsed = end - start
     avg_create_time = elapsed/dir_num
-    logging.info(f"\nDirectories created in average time: {avg_create_time}.\n")
+    print(f"\nDirectories created in average time: {avg_create_time}.\n")
 
 
 def make_repo(repo_name: str, file_num: int,dir_num: int, file_name: str = "file", msg: str = "", dir_name: str = "dir", ext: str = "txt") -> None:
@@ -113,7 +110,6 @@ def make_repo(repo_name: str, file_num: int,dir_num: int, file_name: str = "file
     end = time.time()
     elapsed = end - start
     logging.info(f"Repository created in {elapsed} seconds")
-
 
 def main():
     """
