@@ -3,6 +3,7 @@ import time
 import logging
 import shutil
 import subprocess
+import tqdm
 
 logging.basicConfig(level=logging.INFO)
 
@@ -108,7 +109,7 @@ def make_repo(repo_name: str, file_num: int,dir_num: int, file_name: str = "file
             logging.info(f"Dir: {os.getcwd()} has files.\n")
             os.chdir("..")
     logging.info("\n\n")
-    subprocess.run("git status")
+    os.chdir("..")
     end = time.time()
     elapsed = end - start
     logging.info(f"Repository created in {elapsed} seconds")
@@ -124,6 +125,9 @@ def main():
     dir_num = 4
     repo_name = "my_repo"
     make_repo(repo_name, file_num, dir_num, msg=msg, ext=ext)
+    for path, dir, file in os.walk(repo_name):
+        print((path, dir, file))
 
 if __name__ == "__main__":
     main()
+
