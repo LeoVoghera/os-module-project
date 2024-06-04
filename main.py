@@ -2,6 +2,7 @@ import os
 import subprocess
 import logging
 import json
+import argparse
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -78,9 +79,13 @@ def main() -> None:
     """
     Main function to create the repository.
     """
-    reponame = input("Enter the name of the repository json schema: ")
-    logging.info(f"Creating repository {reponame}...")
-    create_repo(json_to_dict(reponame))
+    parser = argparse.ArgumentParser(description='Create a new repository based on a JSON schema.')
+    parser.add_argument('reponame', type=str, help='The name of the repository JSON schema.')
+
+    args = parser.parse_args()
+
+    logging.info(f"Creating repository {args.reponame}...")
+    create_repo(json_to_dict(args.reponame))
 
 if __name__ == '__main__':
     main()
