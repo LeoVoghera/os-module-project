@@ -1,129 +1,107 @@
 import os
-import time
-import logging
-import shutil
 import subprocess
-from tqdm import tqdm
+import logging
 
+# Set up logging
 logging.basicConfig(level=logging.INFO)
 
-def make_files(file_num: int, file_name: str, msg: str, ext: str = "txt") -> None:
+def create_dir_tree(dir: dict[str, any], cwd: str = ".") -> None:
     """
-    Function to create a specified number of files with a given name, message, and extension.
-
-    Parameters:
-    file_num (int): The number of files to create.
-    file_name (str): The base name for the files.
-    msg (str): The message to write in each file.
-    ext (str): The file extension. Defaults to 'txt'.
+    Create directory tree based on the provided dictionary structure.
     """
-    start = time.time()
-    for i in tqdm(range(file_num), desc="Creating files"):
-        try:
-            with open(f"{file_name}_{i}.{ext}", 'w') as f:
-                f.write(msg)
-        except Exception as e:
-            print(f"Failed to create {file_name}_{i}.{ext} due to {str(e)}")
-    end = time.time()
-    elapsed = end - start
-    avg_create_time = elapsed/file_num
-    print(f"\nFiles created in average time: {avg_create_time}.\n")
+    for name, value in dir.items():
+        if not isinstance(name, str):
+            logging.error(f"Invalid directory name: {name}. Skipping...")
+            continue
 
-def make_dirs(dir_num: int, dir_name: str) -> None:
+        path = os.path.join(cwd, name)
+        if isinstance(value, dict):
+            try:
+                os.makedirs(path, exist_ok=True)
+                logging.info(f"[Creating dir] {path}")
+                create_dir_tree(value, cwd = path)
+            except OSError as e:
+                logging.error(f"Failed to create directory {path}: {e}")
+        elif value == "file":
+            try:
+                logging.info(f"[Creating file] {path}")
+                with open(path, "w") as f:
+                    pass
+            except OSError as e:
+                logging.error(f"Failed to create file {path}: {e}")
+
+def create_repo(repo: dict[str: any]) -> None:
     """
-    Function to create a specified number of directories with a given name.
-
-    Parameters:
-    dir_num (int): The number of directories to create.
-    dir_name (str): The base name for the directories.
+    Create a new repository based on the provided dictionary structure.
     """
-    start = time.time()
-    for i in tqdm(range(dir_num), desc="Creating directories"):
-        try:
-            os.makedirs(f"{dir_name}_{i}", exist_ok=True)
-        except Exception as e:
-            print(f"Failed to create {dir_name}_{i} due to {str(e)}")
-    end = time.time()
-    elapsed = end - start
-    avg_create_time = elapsed/dir_num
-    print(f"\nDirectories created in average time: {avg_create_time}.\n")
+    try:
+        create_dir_tree(repo)
+        repo_name = list(repo.keys())[0]
+        os.chdir(repo_name)
+        subprocess.run(["git", "init"])
+        subprocess.run(["git", "status"])
+        commit = input("Make initial commit? ([y]/n): ").lower()
+        if commit != "n":
+            subprocess.run(["git", "add", "."])
+            subprocess.run(["git", "commit", "-m", "Initial commit."])
+    except OSError as e:
+        logging.error(e)
+    except FileNotFoundError:
+        logging.error("Git is not installed or not in the system's PATH.")
 
-def make_nested_dirs(dir_num: int, dir_name: str, depth: int) -> None:
+EXAMPLE_REPO = {
+    "MY_ADVANCED_PROJECT": {
+        "src": {
+            "main.py": "file",
+            "utils": {
+                "__init__.py": "file",
+                "math_utils.py": "file",
+                "string_utils.py": "file",
+                "data_processing.py": "file"
+            },
+            "models": {
+                "__init__.py": "file",
+                "neural_network.py": "file",
+                "decision_tree.py": "file",
+                "svm.py": "file"
+            }
+        },
+        "test": {
+            "test_main.py": "file",
+            "test_utils": {
+                "__init__.py": "file",
+                "test_math_utils.py": "file",
+                "test_string_utils.py": "file",
+                "test_data_processing.py": "file"
+            },
+            "test_models": {
+                "__init__.py": "file",
+                "test_neural_network.py": "file",
+                "test_decision_tree.py": "file",
+                "test_svm.py": "file"
+            }
+        },
+        "docs": {
+            "README.md": "file",
+            "CONTRIBUTING.md": "file",
+            "CODE_OF_CONDUCT.md": "file"
+        },
+        "scripts": {
+            "data_preparation.py": "file",
+            "train_model.py": "file",
+            "evaluate_model.py": "file"
+        },
+        ".gitignore": "file",
+        "requirements.txt": "file",
+        "setup.py": "file"
+    }
+}
+
+def main() -> None:
     """
-    Function to create a specified number of nested directories with a given name.
-
-    Parameters:
-    dir_num (int): The number of directories to create.
-    dir_name (str): The base name for the directories.
-    depth (int): The depth of the nested directories.
+    Main function to create the repository.
     """
-    start = time.time()
-    for i in tqdm(range(dir_num), desc="Creating nested directories"):
-        nested_dir_name = os.path.join(*[f"{dir_name}_{i}" for _ in range(depth)])
-        try:
-            os.makedirs(nested_dir_name, exist_ok=True)
-        except Exception as e:
-            print(f"Failed to create {nested_dir_name} due to {str(e)}")
-    end = time.time()
-    elapsed = end - start
-    avg_create_time = elapsed/dir_num
-    print(f"\nDirectories created in average time: {avg_create_time}.\n")
+    create_repo(EXAMPLE_REPO)
 
-
-def make_repo(repo_name: str, file_num: int,dir_num: int, file_name: str = "file", msg: str = "", dir_name: str = "dir", ext: str = "txt") -> None:
-    """
-    Function to create a repository with a specified number of directories and files.
-
-    Parameters:
-    repo_name (str): The name of the repository.
-    file_num (int): The number of files to create in each directory.
-    dir_num (int): The number of directories to create.
-    file_name (str): The base name for the files. Defaults to 'file'.
-    msg (str): The message to write in each file. Defaults to ''.
-    dir_name (str): The base name for the directories. Defaults to 'dir'.
-    ext (str): The file extension. Defaults to 'txt'.
-    """
-    start = time.time()
-    if os.path.isdir(repo_name):
-        approval = input(f"a directory by the name {file_name} already exists in the working directory would you like to replace it? (y/[n]): ")
-        if approval.lower() == "y":
-            shutil.rmtree(repo_name)
-        else:
-            print("Exiting system.")
-            return
-    os.makedirs(repo_name)
-    os.chdir(repo_name)
-    subprocess.run("git init")
-    logging.info(f"Making dirs in {os.getcwd()}...")
-    make_dirs(dir_num, dir_name)
-    logging.info("Finished making dirs.\n")
-    logging.info("Making files...")
-    for dir in os.listdir():
-        if os.path.isdir(dir):
-            os.chdir(dir)
-            logging.info(f"Making files in {os.getcwd()}...")
-            make_files(file_num, file_name, msg, ext)
-            logging.info(f"Dir: {os.getcwd()} has files.\n")
-            os.chdir("..")
-    logging.info("\n\n")
-    os.chdir("..")
-    end = time.time()
-    elapsed = end - start
-    logging.info(f"Repository created in {elapsed} seconds")
-
-def main():
-    """
-    Main function to create a repository with a specified structure.
-    """
-    msg = "print('Hello World!')"
-    ext = "py"
-    file_num = 10
-    dir_num = 4
-    repo_name = "my_repo"
-    make_repo(repo_name, file_num, dir_num, msg=msg, ext=ext)
-    for path, dir, file in os.walk(repo_name):
-        print((path, dir, file))
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
-

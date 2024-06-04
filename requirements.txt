@@ -1,9 +1,0 @@
-certifi==2024.2.2
-charset-normalizer==3.3.2
-colorama @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/colorama_1699472650914/work
-idna==3.7
-requests==2.31.0
-setuptools==69.5.1
-tqdm @ file:///C:/b/abs_a7h7n45ccq/croot/tqdm_1716395987133/work
-wheel==0.43.0
-yt-dlp==2024.4.9
