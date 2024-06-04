@@ -1,0 +1,27 @@
+
+{
+    "email_handler": {
+        "__init__.py": "file",
+        "main.py": "file",
+        "email_client.py": "file",
+        "email_parser.py": "file",
+        "email_sender.py": "file",
+        "utils": {
+            "__init__.py": "file",
+            "logger.py": "file",
+            "constants.py": "file",
+            "helpers.py": "file"
+        },
+        "tests": {
+            "__init__.py": "file",
+            "test_email_client.py": "file",
+            "test_email_parser.py": "file",
+            "test_email_sender.py": "file",
+            "test_helpers.py": "file"
+        }
+    },
+    "README.md": "file",
+    "requirements.txt": "file",
+    ".gitignore": "file",
+    "setup.py": "file"
+}

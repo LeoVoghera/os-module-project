@@ -1,9 +1,31 @@
 import os
 import subprocess
 import logging
+import json
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
+
+
+def json_to_dict(filename) -> dict:
+    """
+    Open a JSON file and return its contents as a dictionary.
+    """
+    try:
+        reponame, ext = os.path.splitext(filename)
+        if ext != ".json":
+            logging.error(f"Invalid file extension: {ext} must be a .json extension.")
+            return {}
+        else:
+            with open(filename, "r") as f:
+                return {reponame: json.load(f)}
+    except FileNotFoundError as e:
+        logging.error(f"File not found: {e}")
+    except json.decoder.JSONDecodeError as e:
+        logging.error(f"Failed to decode JSON: {e}")
+    except Exception as e:
+        logging.error(f"Unknown error: {e}")
+    return {}
 
 def create_dir_tree(dir: dict[str, any], cwd: str = ".") -> None:
     """
@@ -36,8 +58,8 @@ def create_repo(repo: dict[str: any]) -> None:
     """
     try:
         create_dir_tree(repo)
-        repo_name = list(repo.keys())[0]
-        os.chdir(repo_name)
+        reponame = list(repo.keys())[0]
+        os.chdir(reponame)
         subprocess.run(["git", "init"])
         subprocess.run(["git", "status"])
         commit = input("Make initial commit? ([y]/n): ").lower()
@@ -48,60 +70,17 @@ def create_repo(repo: dict[str: any]) -> None:
         logging.error(e)
     except FileNotFoundError:
         logging.error("Git is not installed or not in the system's PATH.")
+    except Exception as e:
+        logging.error(f"Unknown error: {e}")
 
-EXAMPLE_REPO = {
-    "MY_ADVANCED_PROJECT": {
-        "src": {
-            "main.py": "file",
-            "utils": {
-                "__init__.py": "file",
-                "math_utils.py": "file",
-                "string_utils.py": "file",
-                "data_processing.py": "file"
-            },
-            "models": {
-                "__init__.py": "file",
-                "neural_network.py": "file",
-                "decision_tree.py": "file",
-                "svm.py": "file"
-            }
-        },
-        "test": {
-            "test_main.py": "file",
-            "test_utils": {
-                "__init__.py": "file",
-                "test_math_utils.py": "file",
-                "test_string_utils.py": "file",
-                "test_data_processing.py": "file"
-            },
-            "test_models": {
-                "__init__.py": "file",
-                "test_neural_network.py": "file",
-                "test_decision_tree.py": "file",
-                "test_svm.py": "file"
-            }
-        },
-        "docs": {
-            "README.md": "file",
-            "CONTRIBUTING.md": "file",
-            "CODE_OF_CONDUCT.md": "file"
-        },
-        "scripts": {
-            "data_preparation.py": "file",
-            "train_model.py": "file",
-            "evaluate_model.py": "file"
-        },
-        ".gitignore": "file",
-        "requirements.txt": "file",
-        "setup.py": "file"
-    }
-}
 
 def main() -> None:
     """
     Main function to create the repository.
     """
-    create_repo(EXAMPLE_REPO)
+    reponame = input("Enter the name of the repository json schema: ")
+    logging.info(f"Creating repository {reponame}...")
+    create_repo(json_to_dict(reponame))
 
 if __name__ == '__main__':
     main()
